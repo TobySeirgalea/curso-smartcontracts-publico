@@ -75,5 +75,14 @@ contract Alcancia {
     //
     function retirar() external {
         // TODO: implementar
+        uint256 cantidad_ahorrada = ahorros[msg.sender];
+        // Check:
+        if (cantidad_ahorrada == 0) revert SinAhorros();
+        // Effect:
+        ahorros[msg.sender] = 0;
+        // Interaction:
+        (bool ok,) = msg.sender.call{value: cantidad_ahorrada}("");
+        if (!ok) revert TransferenciaFallo();
+        emit Retiro(msg.sender, cantidad_ahorrada);
     }
 }

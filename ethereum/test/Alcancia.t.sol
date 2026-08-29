@@ -11,10 +11,10 @@ import "../src/Alcancia.sol";
 contract AlcanciaTest is Test {
     Alcancia alcancia;
     address alice = makeAddr("alice");
-    address bob   = makeAddr("bob");
+    address bob = makeAddr("bob");
 
     function setUp() public {
-        alcancia = new Alcancia();      // el owner es este contrato de test
+        alcancia = new Alcancia(); // el owner es este contrato de test
         vm.deal(alice, 10 ether);
         vm.deal(bob, 10 ether);
     }
@@ -38,19 +38,43 @@ contract AlcanciaTest is Test {
     /// El caso feliz: alice ahorra 3 ETH, retira, y su ahorro queda en 0
     /// **y** el ETH volvió a su cuenta.
     function test_Retirar_DevuelveTodoElAhorro() public {
-        fail("TODO: escribir este test");
+        vm.startPrank(alice);
+
+        alcancia.ahorrar{value: 3 ether}();
+        alcancia.retirar();
+        assertEq(alcancia.miAhorro(), 0 ether);
+        assertEq(alice.balance, 10 ether);
+
+        vm.stopPrank();
     }
 
     /// Retirar sin haber ahorrado nada tiene que revertir con `SinAhorros`.
     /// Pista: `vm.expectRevert(Alcancia.SinAhorros.selector);`
     function test_Retirar_RevierteSinAhorros() public {
-        fail("TODO: escribir este test");
+        vm.startPrank(alice);
+
+        vm.expectRevert(Alcancia.SinAhorros.selector);
+        alcancia.retirar();
+
+        vm.stopPrank();
     }
 
     /// Lo que ahorró alice no puede afectar lo de bob.
     /// (Es el análogo del `test_BalancesAreIsolated` del Vault.)
     function test_AhorrosAisladosEntreUsuarios() public {
-        fail("TODO: escribir este test");
+        vm.prank(alice);
+        alcancia.ahorrar{value: 5 ether}();
+
+        vm.prank(bob);
+        alcancia.ahorrar{value: 7 ether}();
+
+        vm.prank(alice);
+        assertEq(alcancia.miAhorro(), 5 ether);
+        assertEq(alice.balance, 5 ether);
+
+        vm.prank(bob);
+        assertEq(alcancia.miAhorro(), 7 ether);
+        assertEq(bob.balance, 3 ether);
     }
 
     /// El comportamiento con la alcancía CERRADA.
@@ -58,6 +82,32 @@ contract AlcanciaTest is Test {
     /// `retirar()`. Escribí el que corresponda a TU implementación y prepará
     /// el argumento de por qué elegiste eso.
     function test_Retirar_ConLaAlcanciaCerrada() public {
-        fail("TODO: decidir el comportamiento, implementarlo y testearlo");
+        vm.prank(alice);
+        alcancia.ahorrar{value: 5 ether}();
+
+        alcancia.cerrar();
+
+        vm.prank(alice);
+        alcancia.retirar();
+
+        vm.prank(alice);
+        assertEq(alcancia.miAhorro(), 0 ether);
+        assertEq(alice.balance, 10 ether);
+    }
+
+    function test_Ahorrar_ConLaAlcanciaCerrada() public {
+        vm.expectEmit(true, false, false, true);
+        emit Alcancia.Cierre(0);
+        alcancia.cerrar();
+
+        vm.startPrank(alice);
+
+        vm.expectRevert(Alcancia.EstaCerrada.selector);
+        alcancia.ahorrar{value: 5 ether}();
+        assertEq(alcancia.miAhorro(), 0 ether);
+
+        vm.stopPrank();
+
+        assertEq(alice.balance, 10 ether);
     }
 }

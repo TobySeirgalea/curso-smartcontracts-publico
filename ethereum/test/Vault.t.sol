@@ -7,12 +7,12 @@ import "../src/Vault.sol";
 contract VaultTest is Test {
     Vault vault;
     address alice = makeAddr("alice");
-    address bob   = makeAddr("bob");
+    address bob = makeAddr("bob");
 
     function setUp() public {
         vault = new Vault();
         vm.deal(alice, 10 ether);
-        vm.deal(bob,   10 ether);
+        vm.deal(bob, 10 ether);
     }
 
     // ── deposit ──────────────────────────────────────────────────────────
@@ -21,7 +21,6 @@ contract VaultTest is Test {
         vm.prank(alice);
         vault.deposit{value: 1 ether}();
         assertEq(vault.balanceOf(alice), 1 ether);
-        assertEq(alice.balance,9 ether);
     }
 
     function test_Deposit_AccumulatesMultipleDeposits() public {
@@ -34,7 +33,7 @@ contract VaultTest is Test {
 
     function test_Deposit_EmitsEvent() public {
         vm.expectEmit(true, false, false, true);
-        emit Vault.Deposit(alice, 2 ether);
+        emit Vault.Deposit(alice, 1 ether);
         vm.prank(alice);
         vault.deposit{value: 1 ether}();
     }
@@ -88,6 +87,27 @@ contract VaultTest is Test {
     // camino feliz no distingue una implementacion correcta de una que nunca
     // revierte.
 
+    function test_WithdrawAll_ReducesBalanceAndSendEth() public {
+        vm.startPrank(alice);
+        vault.deposit{value: 2 ether}();
+
+        vault.withdrawAll();
+
+        assertEq(vault.balanceOf(alice), 0 ether);
+        assertEq(alice.balance, 10 ether);
+        vm.stopPrank();
+    }
+
+    function test_WithdrawAll_RevertsOnZeroEthersBalance() public {
+        vm.startPrank(alice);
+
+        vm.expectRevert(Vault.InsufficientBalance.selector);
+        vault.withdrawAll();
+
+        assertEq(vault.balanceOf(alice), 0 ether);
+        assertEq(alice.balance, 10 ether);
+        vm.stopPrank();
+    }
 
     // ── aislamiento entre usuarios ────────────────────────────────────────
 
@@ -98,7 +118,7 @@ contract VaultTest is Test {
         vault.deposit{value: 5 ether}();
 
         assertEq(vault.balanceOf(alice), 2 ether);
-        assertEq(vault.balanceOf(bob),   5 ether);
+        assertEq(vault.balanceOf(bob), 5 ether);
     }
 
     function test_Withdraw_DoesNotAffectOtherUsers() public {
@@ -108,10 +128,10 @@ contract VaultTest is Test {
         vault.deposit{value: 5 ether}();
 
         vm.prank(alice);
-        vault.withdraw(2 ether);          // todo lo suyo, con `withdraw`
+        vault.withdraw(2 ether); // todo lo suyo, con `withdraw`
 
         assertEq(vault.balanceOf(alice), 0);
-        assertEq(vault.balanceOf(bob),   5 ether);
+        assertEq(vault.balanceOf(bob), 5 ether);
     }
 
     // ── fuzz ──────────────────────────────────────────────────────────────

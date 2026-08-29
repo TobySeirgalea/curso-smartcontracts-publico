@@ -30,7 +30,7 @@ contract Vault {
         balances[msg.sender] -= amount;
 
         // interaction
-        (bool ok, ) = msg.sender.call{value: amount}("");
+        (bool ok,) = msg.sender.call{value: amount}("");
         if (!ok) revert TransferFailed();
 
         emit Withdraw(msg.sender, amount);
@@ -48,14 +48,18 @@ contract Vault {
     // La pregunta que vale: ¿se puede escribir llamando a `withdraw()` desde
     // acá, en vez de repetir el cuerpo? ¿Qué gana y qué pierde esa versión?
     //
+    // Si llamo a withdraw(balances[msg.sender]) evito repetir código pero me fallan los test. Es porque llamar a otra external es más caro?.
+    //
     function withdrawAll() external {
-        // Check
-        if(balances[msg.sender]==0) revert  InsufficientBalance();
-        // Effect:  
-        uint256 saldo = balances[msg.sender];
-        balances[msg.sender] = 0;
-        // Interaction:  
-        (bool ok, ) = msg.sender.call{value: saldo}("");
+        // Obtengo el saldo del que me invocó
+        uint256 saldo = this.balanceOf(msg.sender);
+        // Check: Si el saldo es cero → custom error InsufficientBalance
+        if (saldo == 0) revert InsufficientBalance();
+        // Effects: Modifico saldo en diccionario
+        balances[msg.sender] -= saldo;
+        // Interaction: Envío el saldo
+        (bool ok,) = msg.sender.call{value: saldo}("");
+        // Chequeo de error en call. Hacerlo es obligatorio
         if (!ok) revert TransferFailed();
         emit Withdraw(msg.sender, saldo);
     }

@@ -86,10 +86,12 @@ unlock
   //   Mirá cómo lo hace demo-simple.ts. Sin esto, `extra_signatories` llega
   //   vacío al validator y `can_unlock` devuelve False.
   //
+  .requiredSignerHash(bob.pubKeyHash)
   // TODO 2 — declarar el rango de validez.
   //   demo-simple.ts usa `invalidHereafter`, porque el escrow exige que la tx
   //   ocurra ANTES del deadline. El vesting exige DESPUÉS. ¿Cuál va acá?
   //   La variable que necesitás ya está calculada: `slotDelDeadline`.
+  .invalidBefore(slotDelDeadline)
   .changeAddress(bob.address)
   .selectUtxosFrom(await bob.w.getUtxos());
 await unlock.complete();

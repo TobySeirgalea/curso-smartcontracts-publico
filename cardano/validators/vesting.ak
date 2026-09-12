@@ -29,7 +29,7 @@ pub type Datum {
 // Lógica auxiliar (testeable de forma aislada, igual que en el escrow)
 // ---------------------------------------------------------------------------
 
-fn can_unlock(_d: Datum, _tx: Transaction) -> Bool {
+fn can_unlock(d: Datum, tx: Transaction) -> Bool {
   // TODO — Clase 5, taller.
   //
   // Devolver True sólo si se cumplen las DOS condiciones:
@@ -37,13 +37,15 @@ fn can_unlock(_d: Datum, _tx: Transaction) -> Bool {
   //   1. El beneficiario del datum firmó la transacción.
   //      Pista: `list.has(tx.extra_signatories, ...)`, igual que el escrow.
   //
+  let beneficiary_has_signed: Bool = list.has(tx.extra_signatories, d.beneficiary)
   //   2. La transacción ocurre DESPUÉS del deadline.
   //      Ojo: el escrow usa `interval.before`. Acá va el otro.
   //      Y como en el escrow, no alcanza con mirar un borde: se exige que
   //      TODO el validity_range esté del lado correcto (`interval.includes`).
   //
+  let after_deadline: Bool =  interval.after(d.deadline) |> interval.includes(tx.validity_range)
   // Cuando esté, cambiar `_d` y `_tx` por `d` y `tx`.
-  todo @"implementar can_unlock"
+  beneficiary_has_signed && after_deadline
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +106,11 @@ test unlock_antes_del_deadline_falla() {
 // Que falle cuando firma otro (definí un hash distinto de `beneficiary_hash`),
 // aunque el tiempo esté bien.
 test unlock_con_firma_equivocada_falla() {
-  False
+  let fake_beneficiary_hash: ByteArray = #"aabbccee"
+  !can_unlock(
+    make_datum(),
+    tx_con([fake_beneficiary_hash], interval.after(deadline_ms))
+  )
   // ↑ borrá este False y escribí el test
 }
 
@@ -114,6 +120,9 @@ test unlock_con_firma_equivocada_falla() {
 // qué garantiza `includes`, escribilo, y si tu implementación no lo cumple,
 // arreglala.
 test unlock_con_rango_que_cruza_el_deadline_falla() {
-  False
+  !can_unlock(
+    make_datum(),
+    tx_con([beneficiary_hash], interval.entirely_before(deadline_ms))
+  )
   // ↑ borrá este False y escribí el test
 }

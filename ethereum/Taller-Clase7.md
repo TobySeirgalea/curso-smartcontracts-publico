@@ -9,6 +9,9 @@
    `slither src/VaultVulnerable.sol --print vars-and-auth`: ¿qué fila delata un bug que el triage
    de los hallazgos no encontró?
 
+```setAdmin    | ['admin']               | []                       |```
+No hay chequeos en `setAdmin`
+
 2. **El atacante y los PoCs.** En `test/VaultVulnerable.t.sol`, escribir `ReentrancyAttacker`
    y los dos tests (`test_Reentrancy_DrenaElVault` y
    `test_AccessControl_ExtranioSeQuedaConLosFondos`), cada uno según la consigna de su

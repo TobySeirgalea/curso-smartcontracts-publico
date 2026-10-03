@@ -191,6 +191,9 @@ aiken check -m poc_ -m prop_        # los PoCs y las propiedades: los escribís 
 
 La primera vez, `aiken check` baja `aiken-lang/fuzz` de GitHub; la imagen reconstruida ya lo trae.
 
+Y en el repaso, la double satisfaction del escrow en una cadena de verdad, con el devnet de la
+Clase 5: `./scripts/devnet.sh up` y `cd cardano/offchain && npm run demo-double`.
+
 ## Trabajo final
 
 El enunciado, el catálogo de pares de vulnerabilidades y las fuentes están en

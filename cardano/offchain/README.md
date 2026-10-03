@@ -16,7 +16,24 @@ se mueven.
 > La primera explica el modelo y nunca falla. La segunda es la que acompaña la
 > slide "El off-chain (Mesh.js)": el mismo código, corriendo. La tercera es el
 > recorrido narrado, incluido el agujero del escrow.
-> Ver `docs/guia-profesor/clase-04.md` §5, §5ter y §5bis.
+>
+> Y una más, de la Clase 9: **`npm run demo-double`**, la double satisfaction contra
+> `escrow_vulnerable` en el devnet (ver abajo).
+
+## Double satisfaction de verdad (`npm run demo-double`, Clase 9)
+
+```bash
+./scripts/devnet.sh up                       # terminal 1
+cd cardano/offchain && npm run demo-double   # terminal 2
+```
+
+Alice bloquea dos UTXOs de 5 ADA en `escrow_vulnerable`, los dos para Bob. Después, **una**
+transacción gasta los dos con **un solo** output de 5 ADA a Bob: el validator corre una vez por
+input, las dos corridas ven el mismo output, y aprueban. La cadena la acepta.
+
+Para probar un escrow arreglado por vos: escribilo en `cardano/validators/<nombre>.ak` (un
+validator `<nombre>` con el mismo `Datum` que `escrow_vulnerable`), corré `aiken build`, y después
+`npm run demo-double -- <nombre>`. Si el fix anda, la transacción no sale.
 
 ## El ciclo mínimo (`npm run demo-simple`)
 

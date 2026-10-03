@@ -10,6 +10,7 @@
     "mirar": "./run.sh src/mirar.ts",
     "demo-simple": "./run.sh src/demo-simple.ts",
     "demo-vesting": "./run.sh src/demo-vesting.ts",
+    "demo-double": "./run.sh src/demo-double.ts",
     "lock": "./run.sh src/cli.ts lock",
     "claim": "./run.sh src/cli.ts claim",
     "cancel": "./run.sh src/cli.ts cancel",

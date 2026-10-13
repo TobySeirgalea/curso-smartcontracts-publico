@@ -196,8 +196,8 @@ Clase 5: `./scripts/devnet.sh up` y `cd cardano/offchain && npm run demo-double`
 
 ## Trabajo final
 
-El enunciado, el catálogo de pares de vulnerabilidades y las fuentes están en
-[`TRABAJO-FINAL.md`](TRABAJO-FINAL.md).
+El enunciado, el catálogo de vulnerabilidades (cada grupo elige una de Ethereum y una de Cardano) y
+las fuentes están en [`TRABAJO-FINAL.md`](TRABAJO-FINAL.md).
 
 ## Mantenerse al día
 

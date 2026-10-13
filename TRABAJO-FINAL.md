@@ -1,7 +1,13 @@
 # Trabajo final — "Explicá una vulnerabilidad"
 
-**Formato.** En grupos de 2, o individual. A cada grupo se le asigna **un par** de vulnerabilidades
-del catálogo de abajo: **una de Ethereum y una de Cardano**. El par lo asigna el docente.
+**Formato.** En grupos de 2, o individual. Cada grupo **elige dos** vulnerabilidades del catálogo de
+abajo: **una de Ethereum y una de Cardano** (por ejemplo, `2-E` y `4-C`). No hace falta que sean del
+mismo par.
+
+**Los pares se reservan por orden de llegada**, escribiendo a **<diegog@dc.uba.ar>** con los
+integrantes del grupo y el par elegido. **Fecha límite para reservar: 1/11.** Dos grupos no pueden
+entregar la misma combinación. Una vulnerabilidad sí puede repetirse en combinaciones distintas
+(`1-E` con `2-C` y `1-E` con `4-C` son pares distintos).
 
 **Entrega.** Tres cosas:
 
@@ -12,9 +18,16 @@ del catálogo de abajo: **una de Ethereum y una de Cardano**. El par lo asigna e
 
 **Fecha:** Deadline 1/12. Posibles entrevistas a partir del 10/12.
 
-**Por qué un par y no una sola.** Las dos vulnerabilidades de cada par son **la misma idea de fondo
-en los dos modelos de ejecución**. Explicar las dos obliga a compararlas, y esa comparación es la
-tesis del curso: cómo se rompe un contrato se deduce del modelo en el que corre.
+**Por qué dos y no una.** Explicar una de cada modelo obliga a compararlas, y esa comparación es la
+tesis del curso: cómo se rompe un contrato se deduce del modelo en el que corre. La comparación es
+obligatoria, pero la pregunta depende de lo que elijan:
+
+- **Si eligen las dos del mismo par**, comparten la idea de fondo y la pregunta es *por qué la misma
+  idea toma dos formas distintas* en cada modelo. El par la deja planteada.
+- **Si eligen de pares distintos**, la pregunta es *por qué cada problema existe en su modelo y no
+  —o no igual— en el otro*. ¿Hay `delegatecall` en Cardano? ¿Se puede acuñar un token de más en
+  Ethereum, y quién lo impide? Esa comparación la tienen que construir ustedes, y por eso vale lo
+  mismo que la otra.
 
 ## Qué hay que entregar, para cada una de las dos vulnerabilidades
 
@@ -44,18 +57,21 @@ blog. Es la misma regla con la que se armó el material de la materia.
 **Lo que más pesa**, en las tres entregas: que el test **demuestre** y no describa, que el fix diga
 qué sacrifica, que la lectura de la herramienta sea honesta (un "no la detecta" bien explicado vale
 más que un "la detecta" sin decir por qué), y **la comparación entre los dos modelos**, que es el
-punto del par.
+punto de elegir una de cada lado.
 
 ## Cómo organizar los 10 minutos de presentación.
 
-Una sugerencia, no una obligación: 1 minuto para la idea común del par; 3 para cada vulnerabilidad
-(qué es, el ejemplo, el test corriendo, el fix y su costo, qué dijo la herramienta); 3 para la
-comparación: por qué la misma idea toma dos formas distintas. El código se muestra corriendo, no en
+Una sugerencia, no una obligación: 1 minuto para presentar las dos y qué las conecta (o las separa);
+3 para cada vulnerabilidad (qué es, el ejemplo, el test corriendo, el fix y su costo, qué dijo la
+herramienta); 3 para la comparación entre los dos modelos. El código se muestra corriendo, no en
 capturas.
 
 ---
 
-# Catálogo de pares
+# Catálogo
+
+Elijan **una `-E` y una `-C`**. Están agrupadas de a pares que comparten una idea de fondo: es una
+ayuda para quien quiera la comparación planteada, no una restricción.
 
 ## Par 1 — Autenticar lo que no producís vos
 

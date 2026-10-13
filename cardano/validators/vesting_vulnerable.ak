@@ -42,16 +42,16 @@ pub type Datum {
 
 pub type Redeemer {
   Unlock
-  /// quien cancela declara quién es
-  Cancel { quien: ByteArray }
+  /// quien cancela declara su hash de clave pública
+  Cancel { signer: ByteArray }
 }
 
 // ---------------------------------------------------------------------------
 // Lógica auxiliar
 // ---------------------------------------------------------------------------
 
-fn signed_by(tx: Transaction, who: ByteArray) -> Bool {
-  list.has(tx.extra_signatories, who)
+fn signed_by(tx: Transaction, key_hash: ByteArray) -> Bool {
+  list.has(tx.extra_signatories, key_hash)
 }
 
 // Después del deadline: si la tx no es de antes, es de después.
@@ -95,8 +95,8 @@ fn can_unlock(d: Datum, own_ref: OutputReference, tx: Transaction) -> Bool {
 }
 
 // Cancelar: el que cancela dice quién es, y tiene que haber firmado.
-fn can_cancel(quien: ByteArray, tx: Transaction) -> Bool {
-  signed_by(tx, quien)
+fn can_cancel(signer: ByteArray, tx: Transaction) -> Bool {
+  signed_by(tx, signer)
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ validator vesting_vulnerable {
     expect Some(d) = datum
     when redeemer is {
       Unlock -> can_unlock(d, utxo, self)
-      Cancel { quien } -> can_cancel(quien, self)
+      Cancel { signer } -> can_cancel(signer, self)
     }
   }
 
@@ -292,7 +292,7 @@ test prop_unlock_rechaza_todo_rango_que_empieza_antes(
 
 // TODO: para toda firma que no es la del owner, Cancel rechaza.
 // Ojo: el generador puede producir justo `owner_hash`; ese caso no cuenta.
-test prop_solo_el_owner_recupera(quien via fuzz.bytearray()) {
+test prop_solo_el_owner_recupera(signer via fuzz.bytearray()) {
   let pendiente: Bool = todo @"consigna 3: la propiedad del owner"
   pendiente
 }

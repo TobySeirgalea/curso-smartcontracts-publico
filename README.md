@@ -194,11 +194,6 @@ La primera vez, `aiken check` baja `aiken-lang/fuzz` de GitHub; la imagen recons
 Y en el repaso, la double satisfaction del escrow en una cadena de verdad, con el devnet de la
 Clase 5: `./scripts/devnet.sh up` y `cd cardano/offchain && npm run demo-double`.
 
-## Trabajo final
-
-El enunciado, el catálogo de vulnerabilidades (cada grupo elige una de Ethereum y una de Cardano) y
-las fuentes están en [`TRABAJO-FINAL.md`](TRABAJO-FINAL.md).
-
 ## Mantenerse al día
 
 Las slides y el material de las clases de análisis se van sumando. Antes de cada clase:

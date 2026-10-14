@@ -12,9 +12,13 @@
 
 use aiken/collection/list
 use aiken/interval
-use cardano/address.{Script, VerificationKey, from_verification_key}
+use cardano/address.{
+  Script, VerificationKey, from_script, from_verification_key,
+}
 use cardano/assets
-use cardano/transaction.{Output, OutputReference, Transaction, placeholder}
+use cardano/transaction.{
+  Input, Output, OutputReference, Transaction, placeholder,
+}
 
 pub type Datum {
   beneficiary: ByteArray,
@@ -32,7 +36,8 @@ pub type Redeemer {
 // Autorización: firma del beneficiario + antes del deadline. (Igual que Clase 5.)
 fn authorized(d: Datum, tx: Transaction) -> Bool {
   let signed = list.has(tx.extra_signatories, d.beneficiary)
-  let on_time = interval.before(d.deadline) |> interval.includes(tx.validity_range)
+  let on_time =
+    interval.before(d.deadline) |> interval.includes(tx.validity_range)
   signed && on_time
 }
 
@@ -97,12 +102,33 @@ const deadline_ms: Int = 10_000
 
 const locked: Int = 100
 
+const script_hash: ByteArray = #"5c0107"
+
+const tx_id: ByteArray =
+  #"0000000000000000000000000000000000000000000000000000000000000000"
+
 fn make_datum() -> Datum {
   Datum {
     beneficiary: beneficiary_hash,
     owner: owner_hash,
     deadline: deadline_ms,
     amount: locked,
+  }
+}
+
+// Un input que vive en la dirección del escrow (script), en el índice `idx`.
+fn make_script_input(idx: Int) -> Input {
+  Input {
+    output_reference: OutputReference {
+      transaction_id: tx_id,
+      output_index: idx,
+    },
+    output: Output {
+      address: from_script(script_hash),
+      value: assets.from_lovelace(locked),
+      datum: transaction.NoDatum,
+      reference_script: None,
+    },
   }
 }
 
@@ -157,10 +183,11 @@ test vuln_claim_sin_output_falla() {
 // debería rechazar.
 test vuln_double_satisfaction_se_aprueba_indebidamente() {
   let d = make_datum()
-  // UN solo output de 100, aunque hay dos claims de 100 en juego.
+  // DOS inputs del escrow (A y B, 100 c/u), pero UN solo output de 100.
   let tx =
     Transaction {
       ..placeholder,
+      inputs: [make_script_input(0), make_script_input(1)],
       extra_signatories: [beneficiary_hash],
       validity_range: interval.before(deadline_ms),
       outputs: [output_to_beneficiary(locked)],

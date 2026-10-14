@@ -1,7 +1,5 @@
 //// vesting_vulnerable.ak — el vesting de la Clase 5, versión 2, con bugs a propósito.
 ////
-//// MATERIAL DE ENSEÑANZA. No usar en producción.
-////
 //// Lo que DICE que hace (la especificación):
 ////   - `Unlock`: el beneficiario retira `amount` recién DESPUÉS del deadline. La tx
 ////     tiene que pagarle `amount` y gastar un solo UTXO de este script.
@@ -19,7 +17,9 @@
 use aiken/collection/list
 use aiken/fuzz
 use aiken/interval
-use cardano/address.{Script, VerificationKey, from_script, from_verification_key}
+use cardano/address.{
+  Script, VerificationKey, from_script, from_verification_key,
+}
 use cardano/assets
 use cardano/transaction.{
   Input, Output, OutputReference, Transaction, placeholder, resolve_input,
@@ -166,7 +166,9 @@ fn make_script_input(idx: Int) -> Input {
   }
 }
 
-fn ref(idx: Int) -> OutputReference {
+// La referencia al input que crea `make_script_input(idx)`: con ella el validator
+// sabe cuál es *su* input. Tiene que coincidir con un input de la tx.
+fn script_input_ref(idx: Int) -> OutputReference {
   OutputReference { transaction_id: tx_id, output_index: idx }
 }
 
@@ -208,13 +210,17 @@ fn tx_cancel(firmas: List<ByteArray>) -> Transaction {
 test v2_unlock_legitimo_pasa() {
   can_unlock(
     make_datum(),
-    ref(0),
+    script_input_ref(0),
     tx_unlock([beneficiary_hash], interval.after(deadline_ms)),
   )
 }
 
 test v2_unlock_sin_firma_falla() {
-  !can_unlock(make_datum(), ref(0), tx_unlock([], interval.after(deadline_ms)))
+  !can_unlock(
+    make_datum(),
+    script_input_ref(0),
+    tx_unlock([], interval.after(deadline_ms)),
+  )
 }
 
 test v2_unlock_sin_pago_al_beneficiario_falla() {
@@ -223,7 +229,7 @@ test v2_unlock_sin_pago_al_beneficiario_falla() {
       ..tx_unlock([beneficiary_hash], interval.after(deadline_ms)),
       outputs: [],
     }
-  !can_unlock(make_datum(), ref(0), tx)
+  !can_unlock(make_datum(), script_input_ref(0), tx)
 }
 
 // La double satisfaction está cerrada: dos inputs del script, rechazado.
@@ -233,7 +239,7 @@ test v2_unlock_con_dos_inputs_de_script_falla() {
       ..tx_unlock([beneficiary_hash], interval.after(deadline_ms)),
       inputs: [make_script_input(0), make_script_input(1)],
     }
-  !can_unlock(make_datum(), ref(0), tx)
+  !can_unlock(make_datum(), script_input_ref(0), tx)
 }
 
 test v2_owner_recupera_los_fondos_pasa() {

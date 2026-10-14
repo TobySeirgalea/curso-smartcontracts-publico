@@ -34,31 +34,32 @@ el nombre exacto.
 
    **Outputs (lo más importante):**
 
-   - [ ] **¿verifica que los fondos van a la dirección correcta?**
-   - [ ] ¿verifica el monto (con `>=`, considerando min-ADA)?
-   - [ ] ¿es robusto si hay outputs extra inesperados?
+   - [✅] **¿verifica que los fondos van a la dirección correcta?**
+   `v2_unlock_sin_pago_al_beneficiario_falla`
+   - [✅] ¿verifica el monto (con `>=`, considerando min-ADA)? `Linea 85`
+   - [✅] ¿es robusto si hay outputs extra inesperados? Porque no hace falta chequear todos los outputs, sino que como consumimos un solo input y producimos un solo output
 
    **Double satisfaction:**
 
-   - [ ] **¿rechaza una tx que gasta varios inputs de este script?**
+   - [✅] **¿rechaza una tx que gasta varios inputs de este script?**
    - [ ] ¿impide que un solo output satisfaga dos validaciones?
    - [ ] ¿ata su aprobación a *su* input (vía `OutputReference`)?
 
    **Datum:**
 
-   - [ ] ¿verifica el origen del datum antes de confiar en él (o no hace falta)?
-   - [ ] **¿`expect Some(d)` maneja el caso `None`?**
+   - [✅] ¿verifica el origen del datum antes de confiar en él (o no hace falta)? No hace falta porque verificas el datum solo si va a ser usado por otros validadores del protocolo.
+   - [✅] **¿`expect Some(d)` maneja el caso `None`?** El expect hace que si no se cumple el `Some(d)` falle porque `Some(d)` da false si recibe `None`.
 
    **Contexto:**
 
    - [ ] ¿funciona sin asumir un único input/output del script?
-   - [ ] ¿funciona sin asumir un orden en las listas?
+   - [✅] ¿funciona sin asumir un orden en las listas? Usa `list.has` y `list.filter`
 
    **Tiempo y firmas:**
 
-   - [ ] **¿mira los dos bordes del `validity_range` (y rechaza uno sin cota)?**
-   - [ ] **¿`extra_signatories` contra el hash correcto?**
-   - [ ] ¿la firma va acompañada de validación de outputs cuando hace falta?
+   - [❌] **¿mira los dos bordes del `validity_range` (y rechaza uno sin cota)?**
+   - [❌] **¿`extra_signatories` contra el hash correcto?** En cancel no chequea que el signer sea el owner.
+   - [✅] ¿la firma va acompañada de validación de outputs cuando hace falta?
 2. **Los PoCs: la tx-dato que aprueba.** En `vesting_vulnerable.ak`, escribir
    `poc_unlock_antes_del_deadline_se_aprueba` y `poc_cualquiera_se_lleva_los_fondos`, cada uno
    según la consigna de su comentario, y borrarles el `todo`. Correr `aiken check -m poc_`. Los

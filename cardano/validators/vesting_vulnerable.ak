@@ -257,16 +257,14 @@ test v2_owner_recupera_los_fondos_pasa() {
 // empieza ANTES del deadline (10_000). Pista: `tx_unlock` arma todo lo demás;
 // elegí el rango con `interval.between`. ¿Y con `interval.everything`?
 test poc_unlock_antes_del_deadline_se_aprueba() {
-  let pendiente: Bool = todo @"consigna 2: la tx que retira antes de tiempo"
-  pendiente
+  let tx = tx_unlock([beneficiary_hash], interval.between(5_000, 15_000))
+  can_unlock(make_datum(), script_input_ref(0), tx)
 }
 
 // TODO: una tx de Cancel firmada por `atacante_hash`, que no es el owner, y que
 // el validator aprueba igual. Mirá qué compara `can_cancel` y contra qué.
 test poc_cualquiera_se_lleva_los_fondos() {
-  let pendiente: Bool =
-    todo @"consigna 2: la tx con la que un extranio se lleva los fondos"
-  pendiente
+  can_cancel(atacante_hash, tx_cancel([atacante_hash]))
 }
 
 // ---------------------------------------------------------------------------

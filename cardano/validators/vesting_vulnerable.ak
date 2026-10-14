@@ -290,13 +290,11 @@ fn rango_que_empieza_antes() -> Fuzzer<interval.Interval> {
 test prop_unlock_rechaza_todo_rango_que_empieza_antes(
   rango via rango_que_empieza_antes(),
 ) {
-  let pendiente: Bool = todo @"consigna 3: la propiedad del tiempo"
-  pendiente
+  !can_unlock(make_datum(), script_input_ref(0), tx_unlock([beneficiary_hash], rango))
 }
 
 // TODO: para toda firma que no es la del owner, Cancel rechaza.
 // Ojo: el generador puede producir justo `owner_hash`; ese caso no cuenta.
 test prop_solo_el_owner_recupera(signer via fuzz.bytearray()) {
-  let pendiente: Bool = todo @"consigna 3: la propiedad del owner"
-  pendiente
+  signer == owner_hash || !can_cancel(signer, tx_cancel([signer]))
 }

@@ -280,12 +280,12 @@
         },
         {
           "title": "Cancel",
-          "description": "quien cancela declara quién es",
+          "description": "quien cancela declara su hash de clave pública",
           "dataType": "constructor",
           "index": 1,
           "fields": [
             {
-              "title": "quien",
+              "title": "signer",
               "$ref": "#/definitions/ByteArray"
             }
           ]

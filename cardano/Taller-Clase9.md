@@ -30,20 +30,49 @@ el nombre exacto.
    test `v2_*` que lo demuestra (y si no hay test, escribirlo). Una pregunta guía: ¿qué campo del
    datum no se lee en ningún lado?
 
+   El checklist, como está en las slides de la Clase 8:
+
+   **Outputs (lo más importante):**
+
+   - [ ] ¿verifica que los fondos van a la dirección correcta?
+   - [ ] ¿verifica el monto (con `>=`, considerando min-ADA)?
+   - [ ] ¿verifica el datum de los outputs de continuación?
+   - [ ] ¿es robusto si hay outputs extra inesperados?
+
+   **Double satisfaction:**
+
+   - [ ] ¿qué pasa si la tx gasta **varios** inputs de este script?
+   - [ ] ¿un solo output podría satisfacer dos validaciones?
+   - [ ] ¿ata su aprobación a *su* input (vía `OutputReference`)?
+
+   **Datum:**
+
+   - [ ] ¿se confía en el datum sin verificar su origen?
+   - [ ] ¿`expect Some(d)` maneja el caso `None`?
+
+   **Contexto:**
+
+   - [ ] ¿se asume un único input/output del script?
+   - [ ] ¿se asume un orden en las listas?
+
+   **Tiempo y firmas:**
+
+   - [ ] ¿`validity_range` correcto (sin asumir un "ahora")?
+   - [ ] ¿mira **los dos bordes**? ¿rechaza un rango sin cota?
+   - [ ] ¿`extra_signatories` contra el hash correcto?
+   - [ ] ¿la firma sola alcanza, o debería ir con validación de outputs?
 2. **Los PoCs: la tx-dato que aprueba.** En `vesting_vulnerable.ak`, escribir
    `poc_unlock_antes_del_deadline_se_aprueba` y `poc_cualquiera_se_lleva_los_fondos`, cada uno
    según la consigna de su comentario, y borrarles el `todo`. Correr `aiken check -m poc_`. Los
    dos tienen que **pasar**: en EUTXO el exploit es una transacción construida como dato, y el
    test afirma que el validator la aprueba. Probar el primero también con `interval.everything`:
    ¿qué significa que pase?
-
 3. **Las propiedades de seguridad.** Escribir el cuerpo de
    `prop_unlock_rechaza_todo_rango_que_empieza_antes` y de `prop_solo_el_owner_recupera` (el
    generador del rango viene hecho). Correr `aiken check -m prop_`: contra este validator tienen
    que **fallar**. Leer el contraejemplo: ¿qué rango encontró? ¿Cruza el deadline? ¿Por qué dice
    `after 1 test` y no `after 100 tests`? Volver a correr con el `--seed=<n>` que imprime: ¿da el
    mismo contraejemplo?
-
 4. **Dos hallazgos**, uno por bug, con este formato:
 
    ```markdown
@@ -56,10 +85,10 @@ el nombre exacto.
    **Recomendación:** el cambio concreto
    **Estado:** dónde está corregido y qué test lo verifica
    ```
-
 5. **El fix.** Copiar `validators/vesting_vulnerable.ak` a `validators/mi_vesting_fixed.ak`,
    renombrar el validator a `mi_vesting_fixed` y arreglar los dos bugs con el cambio más chico
    que los cierre. Conservar el `Datum` y el `Redeemer` como están. Verificarlo dos veces:
+
    - **Con las propiedades.** Las dos de la consigna 3, copiadas a `mi_vesting_fixed.ak`, tienen
      que pasar `[after 100 tests]`.
    - **Con los PoCs.** Los dos de la consigna 2, copiados y dados vuelta (`!can_unlock`,
@@ -68,9 +97,8 @@ el nombre exacto.
    En `vesting_vulnerable.ak` las `prop_*` van a seguir en rojo, y está bien: documentan el bug.
    Si quieren `aiken check` en verde, muévanlas a su archivo en vez de copiarlas.
 
-   Discutir: ¿su fix de `Cancel` sigue sirviendo si mañana le sacan el campo `quien` al redeemer?
+   Discutir: ¿su fix de `Cancel` sigue sirviendo si mañana le sacan el campo `signer` al redeemer?
    ¿Y el del tiempo, si el off-chain manda un rango sin cota inferior?
-
 6. **Opcional: un LLM como auditor.** Pedirle una auditoría de `vesting_vulnerable.ak`. ¿Encuentra
    los dos bugs? ¿Inventa alguno que no existe? Confirmar o descartar **cada** hallazgo con un
    test.

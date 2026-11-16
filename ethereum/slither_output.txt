@@ -1,0 +1,3 @@
+'forge clean' running (wd: /curso/ethereum)
+'forge config --json' running
+'forge build --build-info --deny never src' running (wd: /curso/ethereum)

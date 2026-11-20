@@ -1,6 +1,6 @@
 # Informe sobre vulnerabilidades en Ethereum y Cardano
 
-## DoS por gas
+## E3: DoS por gas
 
 ### ¿Qué es?
 
@@ -60,5 +60,42 @@ Es decir que dentro de un loop estamos realizando una operación costosa. No nos
 
 ### ¿Tiene un análogo en el otro modelo?
 
-La más similar en el otro modelo es C5: Unbounded inputs (fragmentación del estado), ya que ambas buscan elevar el costo de la ejecución de la transacción para que la operación quede inusable, es decir ambas son un *denial of service* y ambas buscan hacerlo elevando el costo de ejecución.
+La más similar que encontramos en el otro modelo es C5: Unbounded inputs (fragmentación del estado), ya que ambas buscan elevar el costo de la ejecución de la transacción para que la operación quede inusable, es decir ambas son un *denial of service*.
 
+## C4: Minting policy que no valida el token name ni la cantidad
+
+### ¿Qué es?
+
+- Los tokens son activos que podemos guardar en los eUTXOs de Cardano.
+- Estos se definen con un nombre y su policyID. El policyID se obtiene a partir del hash del código del script que es su *minting policy*.
+- La *minting policy* define el validador del token.
+- Muchos tokens distintos pueden tener el mismo validador y por lo tanto el mismo policyID.
+- Si al escribir una *minting policy* no diferenciamos por el *token name* permitimos el mismo comportamiento para todos los de mismo policyID. Esto es un problema cuando no es lo que se pretendía en un principio, ya que si nuestra intención era que la *minting policy* fuera para los tokens de un nombre en particular ahora podríamos acabar validando tokens que no queríamos.
+- Además en una transacción una *minting policy* se corre solo una vez, así que si hay múltiples tokens con el mismo policyID, debemos contemplarlo en el código de la *minting policy* para aplicar la validación sobre todos ellos.
+- Otro aspecto a tener en cuenta es que en la *minting policy* debemos distinguir si la cantidad del token es negativa o positiva, ya que en el primer caso debemos quemarlo y en el segundo crearlo. Estas son operaciones distintas que pueden tener distintos requerimientos y que debemos diferenciarlos para tratarlos por separado para evitar que el validador no cumpla lo esperado.
+
+### ¿Por qué existe en ese modelo?
+
+- Cardano decidió tratar a los tokens de forma nativa, como los ADAs, es decir que es el *ledger* de la blockchain el que lleva registro de las transferencias de estos en lugar de tener que crear un *smart contract* específico para ese token que se encargue de eso como pasaría en Ethereum. Esto reduce costos, repetición de código y complejidad según este [artículo](https://www.iog.io/news/native-tokens-on-cardano). Además que el de *ledger* de Cardano ha sido extendido para soportar activos más allá de la cryptocurrency de la blockchain para permitir esto (multi-asset ledger).
+- El hecho de asociar a los tokens su *minting policy* en la identificación de estos garantiza que esta política no va a cambiar. Además de permitir ahorrarse una tabla global que matchee tokens con su *minting policy*. También permite que las transferencias se hagan sin necesidad de ejecutar código extra, sino que funcionan como una transferencia de ADAs. Estos son algunas de las ventajas y razones de por qué se decidió que fuera así en Cardano que menciona este [artículo](https://www.iog.io/news/native-tokens-on-cardano-core-principles-and-points-of-difference).
+- Al usar una cantidad negativa para referir a quemar tokens y una positiva para crear tiene muchas ventajas:
+  - Al usar la misma *minting policy* tanto para crear como para destruir, podés tener su hash como parte del identificador del token. Si las tuvieras separadas tendrías que tener ambos o para uno tener una tabla de indirección.
+  - Te permite hacer un llamado a la *minting policy* por cada `policyID` en vez de tener que hacer una diferenciación de si es burning o minting. Dejan que se encargue de eso el validador.
+
+### Ejemplo mínimo que la exhibe
+
+Los ejemplos típicos son:
+
+- Crear un token con la misma *minting policy* pero con nombre distinto y realizar la transacción, así el validador que no chequea el token name lo acepta.
+- Intentar quemar un token que no debería pero que el validador me lo permita porque hizo los chequeos asumiendo que estaba en el caso de *minting*.
+
+### Test que la demuestra
+
+### Fix
+
+
+
+
+### ¿Alguna herramienta la detecta?
+
+### ¿Tiene un análogo en el otro modelo?

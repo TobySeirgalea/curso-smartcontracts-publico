@@ -97,7 +97,7 @@ contract plazo_fijo_test is Test {
 
     /*En este caso lo afrontamos de otro modo. Como los tests también tienen su cantidad de gas límite, no podemos permitir que estos se queden sin gas porque entonces rechazan siempre y no podemos hacer ningún assert ni nada, entonces ponemos un límite al gas de la operación de invertir menor al del test para asegurarnos que es esta la que se queda sin gas y no el test*/
     function test_dos_por_gas_limitando_gas_para_fixed() public {
-        uint256 immutable gasLimite = 500_000; // gas máximo que aceptamos pagar por invertir
+        uint256 gasLimite = 500_000; // gas máximo que aceptamos pagar por invertir
         bytes memory data = abi.encodeCall(plazo_fijo.invertir, ());
 
         vm.prank(banco);
@@ -129,7 +129,7 @@ contract plazo_fijo_test is Test {
     function test_ataque_por_no_implementar_receive() public {
         vm.deal(banco, 10 ether);
         vm.prank(banco);
-        plazo_fijo immutable plazo_fijo_DoS = new plazo_fijo{value: 10 ether}(2); 
+        plazo_fijo plazo_fijo_DoS = new plazo_fijo{value: 10 ether}(2); 
 
         address usuario_legitimo_1 = makeAddr("usuario_legitimo_1");
         vm.deal(usuario_legitimo_1, 10 ether);
@@ -140,7 +140,7 @@ contract plazo_fijo_test is Test {
         plazo_fijo_DoS.invertir{value: 10 ether}();
         assertEq(usuario_legitimo_1.balance, 0 ether);
 
-        ataque_DoS_por_no_receive immutable ataque = new ataque_DoS_por_no_receive(plazo_fijo_DoS);
+        ataque_DoS_por_no_receive ataque = new ataque_DoS_por_no_receive(plazo_fijo_DoS);
         vm.deal(address(ataque), 10 ether);
         ataque.invertir();
 
@@ -165,7 +165,7 @@ contract plazo_fijo_test is Test {
     function test_ataque_por_no_implementar_receive_fixed() public {
         vm.deal(banco, 10 ether);
         vm.prank(banco);
-        plazo_fijo_arreglado immutable instancia_arreglada = new plazo_fijo_arreglado{value: 10 ether}(2); 
+        plazo_fijo_arreglado instancia_arreglada = new plazo_fijo_arreglado{value: 10 ether}(2); 
 
         address usuario_legitimo_1 = makeAddr("usuario_legitimo_1");
         vm.deal(usuario_legitimo_1, 10 ether);
@@ -174,7 +174,7 @@ contract plazo_fijo_test is Test {
          
         vm.prank(usuario_legitimo_1);
         instancia_arreglada.invertir{value: 10 ether}();
-        ataque_DoS_por_no_receive_fixed immutable ataque = new ataque_DoS_por_no_receive_fixed(instancia_arreglada);
+        ataque_DoS_por_no_receive_fixed ataque = new ataque_DoS_por_no_receive_fixed(instancia_arreglada);
         vm.deal(address(ataque), 10 ether);
         ataque.invertir();
         vm.prank(usuario_legitimo_2);
